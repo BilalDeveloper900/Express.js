@@ -1,37 +1,62 @@
 import express from "express";
 
 const app = express();
+app.use(express.json());
 
 const PORT = process.env.PORT || 3000;
 
 const mockUsers = [
   { id: 1, username: "muhammad", displayName: "Muhammad" },
   { id: 2, username: "bilal", displayName: "Bilal" },
-  { id: 3, username: "asad", displayName: "Asad" },
+  { id: 3, username: "usama", displayName: "Usama" },
+  { id: 4, username: "Akbar", displayName: "Akbar" },
+  { id: 5, username: "asad", displayName: "Asad" },
+  { id: 6, username: "zubar", displayName: "Zubar" },
 ];
 
-app.get("/", (require, response) => {
-  response.status(201).send("hello world");
+// Root route
+app.get("/", (request, response) => {
+  response.status(200).send("Hello, world!");
 });
 
+// GET users route with filtering capability
 app.get("/api/users", (request, response) => {
+  const { filter, value } = request.query;
+  if (filter && value) {
+    const filteredUsers = mockUsers.filter((user) => user[filter] === value);
+    return response.send(filteredUsers);
+  }
   response.send(mockUsers);
 });
 
-app.get("/api/users/:id", (request, response) => {
-  console.log(request.params);
-  const parsedId = parsedId(request.params.id);
-  console.log(parsedId);
+// POST new user route
+app.post("/api/users", (request, response) => {
+  const { body } = request;
+  const newUser = { id: mockUsers.length + 1, ...body };
+  mockUsers.push(newUser);
+  response.status(201).send(newUser);
 });
 
+// GET user by ID route
+app.get("/api/users/:id", (request, response) => {
+  const userId = parseInt(request.params.id);
+  const user = mockUsers.find((user) => user.id === userId);
+  if (!user) {
+    return response.status(404).send({ error: "User not found" });
+  }
+  response.send(user);
+});
+
+// Sample product route
 app.get("/api/product", (request, response) => {
   response.send({
     id: 1,
     name: "computer",
-    type: "LapTop",
+    type: "Laptop",
   });
 });
 
+// Server listening on defined port
 app.listen(PORT, () => {
-  console.log(`Running  on port ${PORT}`);
+  console.log(`Server is running on port ${PORT}`);
 });
